@@ -33,11 +33,48 @@ function init() {
 
 // Define the fetchVideoFromNetwork() function
 function fetchVideoFromNetwork(video) {
-  console.log('fetching videos from network');
+  console.log('fetching videos from network, currently: ' + video.name);
   // Fetch the MP4 and WebM versions of the video using the fetch() function,
   // then expose their response bodies as blobs
-  const mp4Blob = fetch(`videos/${video.name}.mp4`).then(response => response.blob());
-  const webmBlob = fetch(`videos/${video.name}.mp4`).then(response => response.blob());
+  const mp4Headers = new Headers();
+  mp4Headers.append('Accept', 'video/mp4');
+  // mp4Headers.append('Content-Range', 'bytes */1000000')
+  const mp4Init = {
+    method: 'GET',
+    headers: mp4Headers,
+    mode: 'no-cors',
+    cache: 'default',
+    referrerPolicy: 'no-referrer',
+    credentials: 'omit',
+  };
+  const mp4Request = new Request(`videos/${video.name}.mp4`, mp4Init)
+  console.log(mp4Request)
+
+  const mp4Blob = fetch(mp4Request)
+                  .then(res => {
+                    console.log(res)
+                    return res.blob()
+                  });
+
+  const webmHeaders = new Headers();
+  webmHeaders.append('Accept', 'video/webm');
+  // webmHeaders.append('Content-Range', 'bytes */1000000')
+  const webmInit = {
+    method: 'GET',
+    headers: webmHeaders,
+    mode: 'no-cors',
+    cache: 'default',
+    referrerPolicy: 'no-referrer',
+    credentials: 'omit',
+  };
+  const webmRequest = new Request(`videos/${video.name}.webm`, webmInit)
+  console.log(webmRequest)
+
+  const webmBlob = fetch(webmRequest)
+                  .then(res => {
+                    console.log(res)
+                    return res.blob()
+                  });
 
   // Only run the next code when both promises have fulfilled
   Promise.all([mp4Blob, webmBlob]).then(values => {
